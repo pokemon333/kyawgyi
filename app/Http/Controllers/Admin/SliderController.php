@@ -19,7 +19,7 @@ class SliderController extends BaseController
      */
     public function index()
     {
-        return $this->success(SliderResource::collection(Slider::all()));
+        return $this->success(SliderResource::collection(Slider::paginate(5)));
     }
 
     /**
@@ -94,19 +94,23 @@ class SliderController extends BaseController
     public function update(Request $request,$slider)
     {
         $slider = Slider::where('id', $slider)->first();
-        // $filename = time() . "_" . $request->file('file')->getClientOriginalName();
-        // $slider->image = request()->file('file')->storeAs('photos', $filename);
-        // $slider->order_by = $request->order_by;
-        // if ($request->status == 'true') {
-        //     $slider->status = true;
-        // } else {
-        //     $slider->status = false;
-        // }
-        // $slider->update();
+        if($request->file('file')){
+            $path =  storage_path('app/'.$slider->image);
+            unlink($path);
+        }
+        $filename = time() . "_" . $request->file('file')->getClientOriginalName();
+        $slider->image = request()->file('file')->storeAs('photos', $filename);
+        $slider->order_by = $request->order_by;
+        if ($request->status == 'true') {
+            $slider->status = true;
+        } else {
+            $slider->status = false;
+        }
+        $slider->update();
 
         return response()->json([
             'message' => 'oki',
-            'data' => $request
+            'data'  => $request->file
         ], 200);
     }
 
